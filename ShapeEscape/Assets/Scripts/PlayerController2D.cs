@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class PlayerController2D : MonoBehaviour
 {
@@ -15,15 +16,20 @@ public class PlayerController2D : MonoBehaviour
     [Header("Death")]
     public GameObject deathParticlesPrefab;
     public static int deathCount = 0;
+    public float respawnDelay = 0.3f;
 
     private Rigidbody2D rb;
     private bool isGrounded;
     private bool isJumping;
     private float jumpHoldCounter;
 
+    private Vector3 startPosition;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        startPosition = transform.position;
+        isGrounded = true;
     }
 
     void Update()
@@ -74,11 +80,32 @@ public class PlayerController2D : MonoBehaviour
         if (collision.gameObject.CompareTag("Obstacle"))
         {
             Instantiate(deathParticlesPrefab, transform.position, Quaternion.identity);
-            Destroy(gameObject);
+            //Destroy(gameObject);
+            StartCoroutine(RespawnCoroutine());
 
             deathCount++;
-
-            Debug.Log("Hit: " + collision.gameObject.name);
         }
+    }
+
+    IEnumerator RespawnCoroutine()
+    {
+        // Stop movement
+        rb.linearVelocity = Vector2.zero;
+        rb.angularVelocity = 0f;
+
+        // Hide player (instead of deleting) on death
+        GetComponent<SpriteRenderer>().enabled = false;
+
+        // Respawn Delay
+        yield return new WaitForSeconds(respawnDelay);
+
+        // Move player back to start
+        transform.position = startPosition;
+
+        // Reset previous rotation
+        transform.rotation = Quaternion.identity;
+
+        // Unhide player
+        GetComponent<SpriteRenderer>().enabled = true;
     }
 }
