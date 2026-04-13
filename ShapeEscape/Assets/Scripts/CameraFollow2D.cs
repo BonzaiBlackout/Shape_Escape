@@ -3,15 +3,17 @@ using UnityEngine;
 public class CameraFollow2D : MonoBehaviour
 {
     public Transform player;
-    public float offsetX = 5f;
+    public float smoothSpeed = 5f;
+    public Vector3 offset;
 
     void LateUpdate()
     {
         if (player == null) return;
 
-        Vector3 pos = transform.position;
-        pos.x = player.position.x + offsetX;
+        Vector3 targetPosition = player.position + offset;
 
-        transform.position = pos;
+        Vector3 smoothedPosition = Vector3.Lerp(transform.position, targetPosition, smoothSpeed * Time.deltaTime);
+
+        transform.position = new Vector3(smoothedPosition.x, smoothedPosition.y, smoothedPosition.z);
     }
 }
